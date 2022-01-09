@@ -110,8 +110,8 @@ public class Covid {
         }
         return pessoa;
     }
-    static int totalEmpresa(String d[][], int R, int P) throws IOException {
-        int total = 1;
+    static float totalEmpresa(String d[][], int R, int P) throws IOException {
+        float total = 0;
         for(int i = 0; i < d.length; i++){
             if(d[4][i] != null){
                 if(d[4][i].equalsIgnoreCase("P"))
