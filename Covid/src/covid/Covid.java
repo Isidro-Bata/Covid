@@ -4,6 +4,7 @@ import java.io.*;
 
 public class Covid {
     
+    //Metodo Menu
     static byte menu() throws IOException {
         BufferedReader x = new BufferedReader(new InputStreamReader(System.in));
         byte op;
@@ -22,6 +23,7 @@ public class Covid {
         return op;
     }
 
+    //Metodo subMenu do Menu Estatistica
     static byte subMenu() throws IOException {
         BufferedReader x = new BufferedReader(new InputStreamReader(System.in));
         byte op;
@@ -40,6 +42,113 @@ public class Covid {
         return op;
     }
     
+    static int[] qtdTestesRP(String d[][]) throws IOException {
+        int total[] = new int[2];
+        total[0] = total[1] = 0;
+        
+        for(int i = 0; i < d.length; i++){
+            if(d[0][i] != null){
+                if(d[0][i].equalsIgnoreCase("R"))
+                    total[0]++;
+                if(d[0][i].equalsIgnoreCase("P"))
+                    total[1]++;
+            }
+        }
+        return total;
+    }
+    
+    static String[][] idadeMN(String d[][]) throws IOException {
+        String pessoa[][] = new String[2][6];
+        if(d[1][0] == null)
+            return null;
+        
+        int auxm = Integer.parseInt(d[1][0]);
+        int auxM = auxm;
+        
+        for(int i = 0; i < d.length; i++){
+            if(d[1][i] != null){
+                if(d[4][i].equalsIgnoreCase("P")){
+                    if(auxm < Integer.parseInt(d[1][i])){
+                        pessoa[0][0] = d[0][i];
+                        pessoa[0][1] = d[1][i];
+                        pessoa[0][2] = d[2][i];
+                        pessoa[0][3] = d[3][i];
+                        pessoa[0][4] = d[4][i];
+                        pessoa[0][5] = d[5][i];
+                        auxm = Integer.parseInt(pessoa[0][1]);
+                    }
+                    else{
+                        pessoa[0][0] = d[0][i];
+                        pessoa[0][1] = d[1][i];
+                        pessoa[0][2] = d[2][i];
+                        pessoa[0][3] = d[3][i];
+                        pessoa[0][4] = d[4][i];
+                        pessoa[0][5] = d[5][i];
+                        auxm = Integer.parseInt(pessoa[0][1]);
+                    }
+
+                    if(auxM > Integer.parseInt(d[1][i])){
+                        pessoa[1][0] = d[0][i];
+                        pessoa[1][1] = d[1][i];
+                        pessoa[1][2] = d[2][i];
+                        pessoa[1][3] = d[3][i];
+                        pessoa[1][4] = d[4][i];
+                        pessoa[1][5] = d[5][i];
+                        auxm = Integer.parseInt(pessoa[0][1]);
+                    }
+                    else{
+                        pessoa[1][0] = d[0][i];
+                        pessoa[1][1] = d[1][i];
+                        pessoa[1][2] = d[2][i];
+                        pessoa[1][3] = d[3][i];
+                        pessoa[1][4] = d[4][i];
+                        pessoa[1][5] = d[5][i];
+                        auxm = Integer.parseInt(pessoa[0][1]);
+                    }
+                }
+            }
+        }
+        return pessoa;
+    }
+    static int totalEmpresa(String d[][], int R, int P) throws IOException {
+        int total = 1;
+        for(int i = 0; i < d.length; i++){
+            if(d[4][i] != null){
+                if(d[4][i].equalsIgnoreCase("P"))
+                   total += i*P;
+                 
+                if(d[4][i].equalsIgnoreCase("R"))
+                    total += i*R;
+            }
+        }
+        return total;
+    }
+    static int[] porcentagemPN(String d[][]) throws IOException {
+        int total[] = new int[2];
+        int p = 0, r = 0;
+        if(d[4][0] == null)
+            return null;
+ 
+        for(int i = 0; i < d.length; i++){
+            if(d[4][i] != null){
+                if(d[4][i].equalsIgnoreCase("P"))
+                    p++;
+                 
+                if(d[4][i].equalsIgnoreCase("R"))
+                    r++;
+            }
+        }
+        
+        total[0] = p/100;
+        total[1] = r/100;
+        return total;
+    }
+    //Metodo para receber dados
+    /*
+        Parametros
+        String d[][] - Recebe um array bidimensional
+        int i - Posicao da insercao
+    */
     static void receber(String d[][], int pos) throws IOException {
         BufferedReader x = new BufferedReader(new InputStreamReader(System.in));
         
@@ -47,7 +156,7 @@ public class Covid {
         System.out.println("R - Rapido");
         System.out.println("P - PCR");
         char tipoTeste =  texto("Opcao: ",1).charAt(0);
-        d[0][pos] = "" + tipoTeste;
+        d[0][pos] = String.valueOf(tipoTeste);
         
         byte idade = (byte) num("Idade: ",0, 120);
         d[1][pos] = "" + idade;
@@ -65,7 +174,7 @@ public class Covid {
         System.out.println("P - Positivo");
         System.out.println("N - Negativo");
         char resultado = texto("Opcao: ",1).charAt(0);
-        d[4][pos] = "" + resultado;
+        d[4][pos] = String.valueOf(resultado);
         
         System.out.println("Ja vacinou?");
         System.out.println("S - Sim");
@@ -75,6 +184,12 @@ public class Covid {
         d[5][pos] = "" + vacina;
     }
     
+    //Metodo para visualizar dados
+    /*
+        Parametros
+        String d[][] - Recebe um array bidimensional
+        int i - Posicao do elemento desejado 
+    */
     static void visualizar(String d[][], int pos) {
         //String format = ;
         System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
@@ -89,6 +204,16 @@ public class Covid {
         }
     }
     
+    //Metodo para validar numeros
+    /*
+        Parametros
+        String t - O texto que sera impresso
+        int i - Tamanho minimo de numeros 
+        int f - Tamanho maximo de numeros
+    
+        Retorno
+        Tipo interio n
+    */
     public static double num(String t, int i, int f) throws IOException {
         BufferedReader x = new BufferedReader(new InputStreamReader(System.in));
         double n=0;
@@ -101,6 +226,15 @@ public class Covid {
         return n;
     }
     
+    // Metodo para validar um caractere ou conjunto de caracteres
+    /*
+        Parametros
+        String t - O texto que sera impresso
+        int mTam - Tamanho ou numero de caracteres minimo 
+    
+        Retorno
+        Tipo String um caractere ou conjunto de caracteres
+    */
     public static String texto(String t, int mTam) throws IOException {
         BufferedReader x = new BufferedReader(new InputStreamReader(System.in));
         String txt = "";
@@ -113,6 +247,11 @@ public class Covid {
         return txt;
     }
     
+    // Metodo main
+    /*
+        Parametros
+        String [] - Recebe array unidimensional de argumentos
+    */
     public static void main(String[] args) throws IOException {
         String dado[][] =  new String[6][50];
         short pos = 0;
@@ -154,12 +293,36 @@ public class Covid {
                         break;
                         case 4:
                             
+                            if(idadeMN(dado) != null){
+                                System.out.println("\t\tMENOR POSITIVO");
+                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
+                                "Tipo de Teste", "Idade", "Contacto",
+                                "Genero", "Resultado", "Ja vacinou?");
+                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
+                                idadeMN(dado)[0][0].equals("R") ? "Rapido" : "PCR" , idadeMN(dado)[0][1], idadeMN(dado)[0][2], 
+                                idadeMN(dado)[0][3].equals("M") ? "Masculino" : "Femenino", 
+                                idadeMN(dado)[0][4].equals("P") ? "Positivo" : "Negativo", 
+                                idadeMN(dado)[0][5].equals("S") ? "Sim" : "Nao");
+
+                                    /*for(int i = 0; i < idadeMN(dado).length; i++){
+                                    if(idadeMN(dado)[0][i] != null)
+                                        visualizar(idadeMN(dado), i);
+                                }*/
+                                System.out.println("\t\tMAIOR POSITIVO");
+                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
+                                "Tipo de Teste", "Idade", "Contacto",
+                                "Genero", "Resultado", "Ja vacinou?");
+                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
+                                idadeMN(dado)[1][0].equals("R") ? "Rapido" : "PCR" , idadeMN(dado)[1][1], idadeMN(dado)[1][2], 
+                                idadeMN(dado)[1][3].equals("M") ? "Masculino" : "Femenino", 
+                                idadeMN(dado)[1][4].equals("P") ? "Positivo" : "Negativo", 
+                                idadeMN(dado)[1][5].equals("S") ? "Sim" : "Nao");
+                            }
                         break;
+                        
+              
                     }
-                break;
-                case 4:
-                    
-                break;
+               
             }
             System.out.println("\n");
         }while(op != 0);
