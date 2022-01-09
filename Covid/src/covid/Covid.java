@@ -1,6 +1,7 @@
 package covid;
 
 import java.io.*;
+import java.text.DecimalFormat;
 
 public class Covid {
     
@@ -29,120 +30,129 @@ public class Covid {
         byte op;
         
         System.out.println("1. Qtd de testes feitos para cada tipo");
-        System.out.println("2. Total de Positivos e Negativos");
+        System.out.println("2. Percetagem de Positivos e Negativos");
         System.out.println("3. Valor total obtido pela Empresa");
         System.out.println("4. Pessoa mais velha e mais nova contaminada");
+        System.out.println("5. Quantidade de pessoas que precisam de vacina");
         System.out.println("0. Voltar");
         do {
             System.out.print("Opcao: ");
             op = Byte.parseByte(x.readLine());
-            if(op < 0 || op > 4)
+            if(op < 0 || op > 5)
                 System.out.println("Opcao invalida!!!");
-        }while(op < 0 || op > 4);
+        }while(op < 0 || op > 5);
         return op;
     }
     
-    static int[] qtdTestesRP(String d[][]) throws IOException {
-        int total[] = new int[2];
-        total[0] = total[1] = 0;
+    // calcula a qtd de testes rapidos
+    static short qtdTestesR(String d[][], int qtd) {
+        short total = 0;
         
-        for(int i = 0; i < d.length; i++){
-            if(d[0][i] != null){
-                if(d[0][i].equalsIgnoreCase("R"))
-                    total[0]++;
-                if(d[0][i].equalsIgnoreCase("P"))
-                    total[1]++;
-            }
+        for(int i = 0; i < qtd; i++){
+            if(d[0][i].equalsIgnoreCase("R"))
+                total++;
         }
         return total;
     }
     
-    static String[][] idadeMN(String d[][]) throws IOException {
-        String pessoa[][] = new String[2][6];
-        if(d[1][0] == null)
-            return null;
+    // calcula a qtd de testes pcr
+    static short qtdTestesP(String d[][], int qtd) {
+        short total = 0;
         
-        int auxm = Integer.parseInt(d[1][0]);
-        int auxM = auxm;
+        for(int i = 0; i < qtd; i++){
+            if(d[0][i].equalsIgnoreCase("P"))
+                total++;
+        }
+        return total;
+    }
+    
+    // retorna o indice da menor pessoa contaminada
+    static short contaminadoMenor(String d[][], int qtd) {
+        short pos = 0;
         
-        for(int i = 0; i < d.length; i++){
-            if(d[1][i] != null){
-                if(d[4][i].equalsIgnoreCase("P")){
-                    if(auxm < Integer.parseInt(d[1][i])){
-                        pessoa[0][0] = d[0][i];
-                        pessoa[0][1] = d[1][i];
-                        pessoa[0][2] = d[2][i];
-                        pessoa[0][3] = d[3][i];
-                        pessoa[0][4] = d[4][i];
-                        pessoa[0][5] = d[5][i];
-                        auxm = Integer.parseInt(pessoa[0][1]);
-                    }
-                    else{
-                        pessoa[0][0] = d[0][i];
-                        pessoa[0][1] = d[1][i];
-                        pessoa[0][2] = d[2][i];
-                        pessoa[0][3] = d[3][i];
-                        pessoa[0][4] = d[4][i];
-                        pessoa[0][5] = d[5][i];
-                        auxm = Integer.parseInt(pessoa[0][1]);
-                    }
-
-                    if(auxM > Integer.parseInt(d[1][i])){
-                        pessoa[1][0] = d[0][i];
-                        pessoa[1][1] = d[1][i];
-                        pessoa[1][2] = d[2][i];
-                        pessoa[1][3] = d[3][i];
-                        pessoa[1][4] = d[4][i];
-                        pessoa[1][5] = d[5][i];
-                        auxm = Integer.parseInt(pessoa[0][1]);
-                    }
-                    else{
-                        pessoa[1][0] = d[0][i];
-                        pessoa[1][1] = d[1][i];
-                        pessoa[1][2] = d[2][i];
-                        pessoa[1][3] = d[3][i];
-                        pessoa[1][4] = d[4][i];
-                        pessoa[1][5] = d[5][i];
-                        auxm = Integer.parseInt(pessoa[0][1]);
-                    }
+        byte auxm = Byte.parseByte(d[1][0]);
+        
+        for(int i = 1; i < qtd; i++){
+            if(d[4][i].equalsIgnoreCase("P")){ // verifica se e a pessoa esta contaminada
+                if(auxm > Byte.parseByte(d[1][i])) { // verifica se a pessoa e a maior
+                    pos =(short) i; // actualiza o indice
+                    auxm = Byte.parseByte(d[1][i]); // actualiza a idade da maior pessoa contamidada
                 }
             }
         }
-        return pessoa;
+        
+        return pos;
     }
-    static float totalEmpresa(String d[][], int R, int P) throws IOException {
-        float total = 0;
-        for(int i = 0; i < d.length; i++){
-            if(d[4][i] != null){
-                if(d[4][i].equalsIgnoreCase("P"))
-                   total += i*P;
-                 
-                if(d[4][i].equalsIgnoreCase("R"))
-                    total += i*R;
-            }
-        }
-        return total;
-    }
-    static int[] porcentagemPN(String d[][]) throws IOException {
-        int total[] = new int[2];
-        int p = 0, r = 0;
-        if(d[4][0] == null)
-            return null;
- 
-        for(int i = 0; i < d.length; i++){
-            if(d[4][i] != null){
-                if(d[4][i].equalsIgnoreCase("P"))
-                    p++;
-                 
-                if(d[4][i].equalsIgnoreCase("R"))
-                    r++;
+    
+    // retorna o indice da maior pessoa contaminada
+    static short contaminadoMaior(String d[][], int qtd) {
+        short pos = 0;
+        
+        byte auxm = Byte.parseByte(d[1][0]);
+        
+        for(int i = 1; i < qtd; i++){
+            if(d[4][i].equalsIgnoreCase("P")){ // verifica se e a pessoa esta contaminada
+                if(auxm < Byte.parseByte(d[1][i])) { // verifica se a pessoa e a maior
+                    pos =(short) i; // actualiza o indice
+                    auxm = Byte.parseByte(d[1][i]); // actualiza a idade da maior pessoa contamidada
+                }
             }
         }
         
-        total[0] = p/100;
-        total[1] = r/100;
+        return pos;
+    }
+    
+    // calcula o total da empresa
+    static int totalEmpresa(String d[][], int qtd) {
+        final short R = 1000;
+        final short P = 3500;
+        
+        int total = 0;
+        
+        for(int i = 0; i < qtd; i++){
+            if(d[0][i].equalsIgnoreCase("P"))
+               total += P;
+
+            if(d[0][i].equalsIgnoreCase("R"))
+                total += R;
+        }
         return total;
     }
+    
+    // calcula a percentagem de pessoas posetivas
+    static float porcentagemP(String d[][], int qtd) {
+        int p = 0;
+ 
+        for(int i = 0; i < qtd; i++){
+            if(d[4][i].equalsIgnoreCase("P"))
+                p++;
+        }
+        
+        return (float) p/(qtdTestesR(d,qtd)+qtdTestesP(d,qtd));
+    }
+    
+    // calcula a percentagem de pessoas negativas
+    static float porcentagemN(String d[][], int qtd) {
+        int n = 0;
+ 
+        for(int i = 0; i < qtd; i++){
+            if(d[4][i].equalsIgnoreCase("N"))
+                n++;
+        }
+        return (float)n/(qtdTestesR(d,qtd)+qtdTestesP(d,qtd));
+    }
+    
+    // calcula o numero de pessoas que precisam de vacina
+    static short naoVacinados(String d[][], int qtd) {
+        short n = 0;
+        
+        for(int i=0; i < qtd; i++)
+            if(d[5][i].equalsIgnoreCase("N"))
+                n++;
+        
+        return n;
+    }
+    
     //Metodo para receber dados
     /*
         Parametros
@@ -155,7 +165,13 @@ public class Covid {
         System.out.println("Tipo de Teste:");
         System.out.println("R - Rapido");
         System.out.println("P - PCR");
-        char tipoTeste =  texto("Opcao: ",1).charAt(0);
+        char tipoTeste;
+        // leitura e validacao da entrada da tipo de teste
+        do {
+            tipoTeste =  texto("Opcao: ",1).charAt(0);
+            if(tipoTeste != 'R' && tipoTeste != 'P')
+                System.out.println("Opcao invalida!");
+        }while(tipoTeste != 'R' && tipoTeste != 'P');
         d[0][pos] = String.valueOf(tipoTeste);
         
         byte idade = (byte) num("Idade: ",0, 120);
@@ -167,20 +183,37 @@ public class Covid {
         System.out.println("Genero:");
         System.out.println("M - Masculino");
         System.out.println("F - Femenino");
-        char genero = texto("Opcao: ",1).charAt(0);
+        char genero;
+        // leitura e validacao da entrada da genero
+        do {
+            genero = texto("Opcao: ",1).charAt(0);
+            if(genero != 'M' && genero != 'F')
+                System.out.println("Opcao invalida!");
+        }while(genero != 'M' && genero != 'F');
         d[3][pos] = "" + genero;
         
         System.out.println("Resultado:");
         System.out.println("P - Positivo");
         System.out.println("N - Negativo");
-        char resultado = texto("Opcao: ",1).charAt(0);
+        char resultado;
+        // leitura e validacao da entrada da resultado
+        do {
+            resultado = texto("Opcao: ",1).charAt(0);
+            if(resultado != 'P' && resultado != 'N')
+                System.out.println("Opcao invalida!");
+        }while(resultado != 'P' && resultado != 'N');
         d[4][pos] = String.valueOf(resultado);
         
         System.out.println("Ja vacinou?");
         System.out.println("S - Sim");
         System.out.println("N - Nao");
- 
-        char vacina = texto("Opcao: ",1).charAt(0);
+        char vacina;
+        // leitura e validacao da entrada da vacina
+        do {
+            vacina = texto("Opcao: ",1).charAt(0);
+            if(vacina != 'S' && vacina != 'N')
+                System.out.println("Opcao invalida!");
+        }while(vacina != 'S' && vacina != 'N');
         d[5][pos] = "" + vacina;
     }
     
@@ -188,20 +221,35 @@ public class Covid {
     /*
         Parametros
         String d[][] - Recebe um array bidimensional
-        int i - Posicao do elemento desejado 
+        int qtd - qtd de elemento disponiveis no array 
     */
-    static void visualizar(String d[][], int pos) {
-        //String format = ;
+    static void visualizar(String d[][], int qtd) {
+        // formatacao da tabela
         System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
                             "Tipo de Teste", "Idade", "Contacto",
                             "Genero", "Resultado", "Ja vacinou?");
-        for(int i=0;i<pos; i++) {
+        for(int i=0;i<qtd; i++) {
             System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
                               d[0][i].equals("R") ? "Rapido" : "PCR" , d[1][i], d[2][i], 
                               d[3][i].equals("M") ? "Masculino" : "Femenino", 
                               d[4][i].equals("P") ? "Positivo" : "Negativo", 
                               d[5][i].equals("S") ? "Sim" : "Nao");
         }
+    }
+    
+    // visualiza um elemento do array numa posicao especifica
+    static void visIndice(String d[][], int ind) {
+        // formatacao da tabela
+        System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
+                            "Tipo de Teste", "Idade", "Contacto",
+                            "Genero", "Resultado", "Ja vacinou?");
+        
+        System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
+                          d[0][ind].equals("R") ? "Rapido" : "PCR" , d[1][ind], d[2][ind], 
+                          d[3][ind].equals("M") ? "Masculino" : "Femenino", 
+                          d[4][ind].equals("P") ? "Positivo" : "Negativo", 
+                          d[5][ind].equals("S") ? "Sim" : "Nao");
+
     }
     
     //Metodo para validar numeros
@@ -252,20 +300,12 @@ public class Covid {
         Parametros
         String [] - Recebe array unidimensional de argumentos
     */
+    
     public static void main(String[] args) throws IOException {
         String dado[][] =  new String[6][50];
-        short pos = 0;
+        short numElemento = 0;
         
-        final short R = 1000;
-        final short P = 3500;
-        
-        short qtdPcr;
-        short qtdR;
-        
-        short qtdP;
-        short qtdN;
-        
-        short qtdV;
+        DecimalFormat t = new DecimalFormat("###,###.00 Mt");
         
         byte op, op1;
         
@@ -273,56 +313,50 @@ public class Covid {
             op = menu();
             switch(op) {
                 case 1:
-                    receber(dado,pos++);
+                    receber(dado,numElemento++);
                 break;
                 case 2:
-                    visualizar(dado,pos);
+                    visualizar(dado,numElemento);
                 break;
                 case 3:
                     System.out.println("\n");
                     op1 = subMenu();
                     switch(op1) {
                         case 1:
-                        
+                            short qtdPcr = qtdTestesP(dado,numElemento);
+                            short qtdR = qtdTestesR(dado,numElemento);
+                            
+                            System.out.println("\nPCR: " + qtdPcr + "\nRapido: " + qtdR +"\n");
                         break;
                         case 2:
+                            float perP = porcentagemP(dado,numElemento);
+                            float perN = porcentagemN(dado,numElemento);
                             
+                            System.out.println("\nPosetivos: " + perP + "%\nNegativos: " + perN + "%\n");
                         break;
                         case 3:
-                            
+                            System.out.println();
+                            System.out.println("Total da Empresa: " + t.format(totalEmpresa(dado,numElemento)));
                         break;
                         case 4:
+                            System.out.println("\n\tA pessoa mais velha contaminada:\n");
                             
-                            if(idadeMN(dado) != null){
-                                System.out.println("\t\tMENOR POSITIVO");
-                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
-                                "Tipo de Teste", "Idade", "Contacto",
-                                "Genero", "Resultado", "Ja vacinou?");
-                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
-                                idadeMN(dado)[0][0].equals("R") ? "Rapido" : "PCR" , idadeMN(dado)[0][1], idadeMN(dado)[0][2], 
-                                idadeMN(dado)[0][3].equals("M") ? "Masculino" : "Femenino", 
-                                idadeMN(dado)[0][4].equals("P") ? "Positivo" : "Negativo", 
-                                idadeMN(dado)[0][5].equals("S") ? "Sim" : "Nao");
-
-                                    /*for(int i = 0; i < idadeMN(dado).length; i++){
-                                    if(idadeMN(dado)[0][i] != null)
-                                        visualizar(idadeMN(dado), i);
-                                }*/
-                                System.out.println("\t\tMAIOR POSITIVO");
-                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
-                                "Tipo de Teste", "Idade", "Contacto",
-                                "Genero", "Resultado", "Ja vacinou?");
-                                System.out.printf("%-20s %-20s %-20s %-20s %-20s %-20s\n",
-                                idadeMN(dado)[1][0].equals("R") ? "Rapido" : "PCR" , idadeMN(dado)[1][1], idadeMN(dado)[1][2], 
-                                idadeMN(dado)[1][3].equals("M") ? "Masculino" : "Femenino", 
-                                idadeMN(dado)[1][4].equals("P") ? "Positivo" : "Negativo", 
-                                idadeMN(dado)[1][5].equals("S") ? "Sim" : "Nao");
-                            }
+                            short mo = contaminadoMaior(dado,numElemento);
+                            
+                            visIndice(dado,mo);
+                            
+                            System.out.println("\n\tA mais nova contaminada:\n");
+                            
+                            short mn = contaminadoMenor(dado,numElemento);
+                            
+                            visIndice(dado,mn);
+                            
+                            System.out.println();
                         break;
-                        
-              
+                        case 5:
+                            System.out.println("\nNumero de pessoas: " + naoVacinados(dado,numElemento) + " Pessoas\n");
+                        break;
                     }
-               
             }
             System.out.println("\n");
         }while(op != 0);
